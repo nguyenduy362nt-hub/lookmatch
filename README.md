@@ -1,6 +1,6 @@
 # LookMatch
 
-**Xây dựng LookMatch: ứng dụng tìm sản phẩm thời trang từ ảnh khách gửi dựa trên truy hồi ảnh bằng vector đặc trưng**
+**Xây dựng LookMatch: ứng dụng tìm sản phẩm chăn ga gối nệm từ ảnh khách gửi dựa trên truy hồi ảnh bằng vector đặc trưng**
 
 *Building LookMatch: A Fashion Product Finder from Customer Photos Based on Embedding-based Image Retrieval*
 
@@ -10,7 +10,7 @@ GVHD: TS. Nguyễn Quang Trung.
 
 ## Câu định vị
 
-> Đồ án giải quyết **việc nhân viên shop thời trang online mất vài phút và hay nhầm khi tìm sản phẩm từ ảnh khách gửi** cho **nhân viên các shop thời trang online nhỏ**, đo bằng **Recall@5 và thời gian tìm (giây/lượt)**.
+> Đồ án giải quyết **việc nhân viên shop chăn ga gối nệm online mất vài phút và hay nhầm khi tìm sản phẩm từ ảnh khách gửi** cho **nhân viên các shop chăn ga gối nệm online nhỏ**, đo bằng **Recall@5 và thời gian tìm (giây/lượt)**.
 
 ## Câu hỏi nghiên cứu và giả thuyết
 
