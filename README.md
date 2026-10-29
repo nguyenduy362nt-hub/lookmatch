@@ -64,7 +64,7 @@ docker run -p 8000:8000 lookmatch
 
 **Kiểm thử tự động:** GitHub Actions chạy `pytest` mỗi lần push (xem tab Actions).
 
-**Demo (video 30–60 giây):** <dán link video vào đây>
+**Demo (video 30–60 giây):** <https://drive.google.com/file/d/1SOBUdQ74zOjgbhquBs_k333wuubYw1Ed/view?usp=sharing>
 
 ## Tài liệu kiến trúc
 
