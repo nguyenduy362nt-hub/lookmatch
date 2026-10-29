@@ -2,7 +2,7 @@
 
 **Xây dựng LookMatch: ứng dụng tìm sản phẩm chăn ga gối nệm từ ảnh khách gửi dựa trên truy hồi ảnh bằng vector đặc trưng**
 
-*Building LookMatch: A Fashion Product Finder from Customer Photos Based on Embedding-based Image Retrieval*
+*Building LookMatch: A Bedding Product Finder from Customer Photos Based on Embedding-based Image Retrieval*
 
 Đồ án chuyên ngành CMP436, HK1 2026-2027, Khoa CNTT, HUTECH.
 Sinh viên: Nguyễn Quốc Duy, MSSV 2380600360, lớp 23DTHC4.
@@ -28,21 +28,50 @@ GVHD: TS. Nguyễn Quang Trung.
 
 Cột "Sau", "Ngày đo" và "Bằng chứng" để trống cho đến khi có số đo thật. Mục tiêu (H1: Recall@5 >= 80%; H2: <= 20 giây) nằm ở phần giả thuyết ở trên.
 
-## Cấu trúc repo (dự kiến)
+## Cấu trúc repo
 
 ```
 lookmatch/
-  api/          # FastAPI + Dockerfile
-  app/          # Flutter
-  eval/         # bộ ảnh kiểm thử (đã ẩn danh), nhãn, script tính Recall@K, mAP
+  api/          # FastAPI + Dockerfile + tests
+  app/          # Flutter (sẽ thêm)
+  eval/         # đặc tả đánh giá, bộ ảnh kiểm thử (đã ẩn danh), nhãn, script Recall@K, mAP
   evidence/     # bảng bấm giờ, ảnh xác nhận của chủ shop (đã che thông tin cá nhân)
-  docs/         # ADR, C4, báo cáo
+  docs/         # C4, ADR, ERD
+  .github/workflows/ci.yml   # CI chạy pytest
   AI_LOG.md     # Nhật ký AI
 ```
 
 ## Cách chạy
 
-(Sẽ bổ sung khi có API và ứng dụng.)
+Yêu cầu: Python 3.11 trở lên (hoặc Docker).
+
+**Cách 1: Python**
+
+```bash
+pip install -r api/requirements.txt
+python -m pytest -q                      # chạy test, kỳ vọng: 2 passed
+python -m uvicorn api.main:app --reload  # chạy server
+```
+
+Mở trình duyệt: `http://localhost:8000/health` trả về `{"status":"ok"}`; giao diện thử API tại `http://localhost:8000/docs`.
+
+**Cách 2: Docker**
+
+```bash
+docker build -t lookmatch -f api/Dockerfile .
+docker run -p 8000:8000 lookmatch
+```
+
+**Kiểm thử tự động:** GitHub Actions chạy `pytest` mỗi lần push (xem tab Actions).
+
+**Demo (video 30–60 giây):** <dán link video vào đây>
+
+## Tài liệu kiến trúc
+
+- [C4 mức 1–3](docs/c4.md)
+- ADR: [ADR-1](docs/adr/ADR-001-chon-mo-hinh-bieu-dien.md), [ADR-2](docs/adr/ADR-002-suy-luan-tren-server.md), [ADR-3](docs/adr/ADR-003-faiss-flat-cosine.md)
+- [ERD sơ bộ](docs/erd.md)
+- [Đặc tả đánh giá](eval/README.md)
 
 ## Quy ước
 
