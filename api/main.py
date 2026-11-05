@@ -1,6 +1,21 @@
-from fastapi import FastAPI
+import io
+import json
+import os
+from pathlib import Path
 
-app = FastAPI(title="LookMatch API", version="0.1.0")
+import numpy as np
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from PIL import Image, UnidentifiedImageError
+
+from api.search import Searcher
+
+app = FastAPI(title="LookMatch API", version="0.2.0")
+app.state.searcher = None   # Searcher; test có thể gán trực tiếp
+app.state.embedder = None   # đối tượng có .embed(PIL.Image)
+
+DATA_DIR = Path(os.environ.get("LOOKMATCH_DATA", "data"))
+MAX_BYTES = 8 * 1024 * 1024
+TOP_K = 10
 
 
 @app.get("/")
@@ -11,3 +26,38 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+def _get_searcher():
+    if app.state.searcher is None:
+        vec, ids = DATA_DIR / "index.npy", DATA_DIR / "ids.json"
+        if not (vec.exists() and ids.exists()):
+            raise HTTPException(503, "Chưa có chỉ mục. Chạy: python eval/build_index.py")
+        app.state.searcher = Searcher(np.load(vec), json.loads(ids.read_text(encoding="utf-8")))
+    return app.state.searcher
+
+
+def _get_embedder():
+    if app.state.embedder is None:
+        from api.embedder import ClipEmbedder
+        app.state.embedder = ClipEmbedder()
+    return app.state.embedder
+
+
+@app.post("/search")
+async def search(file: UploadFile = File(...)):
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "File rỗng")
+    if len(data) > MAX_BYTES:
+        raise HTTPException(413, "Ảnh quá lớn (tối đa 8 MB)")
+    try:
+        image = Image.open(io.BytesIO(data))
+        image.load()
+    except (UnidentifiedImageError, OSError):
+        raise HTTPException(400, "File không phải ảnh hợp lệ")
+    searcher = _get_searcher()
+    vector = _get_embedder().embed(image)
+    results = searcher.search(vector, TOP_K)
+    return {"results": [{"rank": i + 1, "product_id": pid, "score": round(s, 4)}
+                        for i, (pid, s) in enumerate(results)]}
