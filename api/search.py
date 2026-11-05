@@ -27,6 +27,8 @@ def normalize(v):
 class Searcher:
     def __init__(self, vectors, ids):
         vectors = normalize(vectors)
+        if vectors.ndim != 2:
+            raise ValueError(f"vectors phải có dạng (n, d), nhận được {vectors.shape}")
         if len(ids) != len(vectors):
             raise ValueError("số id khác số vector")
         self.ids = list(ids)
