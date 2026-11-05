@@ -1,15 +1,29 @@
 import io
 import json
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import numpy as np
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image, UnidentifiedImageError
 
 from api.search import Searcher
 
-app = FastAPI(title="LookMatch API", version="0.2.0")
+@asynccontextmanager
+async def lifespan(app):
+    """Nạp sẵn chỉ mục và mô hình khi server khởi động, để lượt tìm đầu tiên không bị chậm."""
+    if app.state.searcher is None and (DATA_DIR / "index.npy").exists():
+        _get_searcher()
+        _get_embedder()
+    yield
+
+
+app = FastAPI(title="LookMatch API", version="0.2.0", lifespan=lifespan)
+# Cho phép app Flutter chạy trên trình duyệt (cổng khác) gọi API. Chỉ dùng khi phát triển;
+# khi triển khai thật sẽ giới hạn allow_origins theo tên miền của app.
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 app.state.searcher = None   # Searcher; test có thể gán trực tiếp
 app.state.embedder = None   # đối tượng có .embed(PIL.Image)
 
