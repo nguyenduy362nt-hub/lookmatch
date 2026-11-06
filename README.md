@@ -28,14 +28,20 @@ GVHD: TS. Nguyễn Quang Trung.
 
 Cột "Sau", "Ngày đo" và "Bằng chứng" để trống cho đến khi có số đo thật. Mục tiêu (H1: Recall@5 >= 80%; H2: <= 20 giây) nằm ở phần giả thuyết ở trên.
 
+## Tình trạng hiện tại (W04)
+
+- Tính năng #1 (chọn ảnh khách, trả top mẫu giống nhất) chạy đầu-cuối: app Flutter, API FastAPI, CLIP, xếp hạng.
+- Catalog thử nghiệm: 8 mẫu chăn ga thật của shop Quý Hòa. Ảnh catalog và ảnh khách không đưa lên repo công khai.
+- Recall@5 chưa có kết quả chính thức: cần >= 50 ảnh khách thật khác ảnh catalog. Lần chạy thử 4/4 dùng ảnh chụp từ chính catalog nên không dùng làm kết luận.
+
 ## Cấu trúc repo
 
 ```
 lookmatch/
   api/          # FastAPI + Dockerfile + tests
-  app/          # Flutter (sẽ thêm)
-  eval/         # đặc tả đánh giá, bộ ảnh kiểm thử (đã ẩn danh), nhãn, script Recall@K, mAP
-  evidence/     # bảng bấm giờ, ảnh xác nhận của chủ shop (đã che thông tin cá nhân)
+  app/          # Flutter: màn hình chọn ảnh và hiện top kết quả
+  eval/         # đặc tả đánh giá, script build_index.py và eval_recall.py
+  evidence/     # bảng bấm giờ (khi có), đã che thông tin cá nhân
   docs/         # C4, ADR, ERD
   .github/workflows/ci.yml   # CI chạy pytest
   AI_LOG.md     # Nhật ký AI
@@ -43,19 +49,29 @@ lookmatch/
 
 ## Cách chạy
 
-Yêu cầu: Python 3.11 trở lên (hoặc Docker).
+Yêu cầu: Python 3.12 (hoặc Docker cho phần test), Flutter để chạy app.
 
 **Cách 1: Python**
 
 ```bash
-pip install -r api/requirements.txt
-python -m pytest -q                      # chạy test, kỳ vọng: 2 passed
-python -m uvicorn api.main:app --reload  # chạy server
+pip install -r api/requirements-ml.txt   # gồm torch, transformers
+python -m pytest -q                      # kỳ vọng: 5 passed
+python eval/build_index.py               # tạo chỉ mục từ data/catalog (ảnh catalog không có trên repo)
+python -m uvicorn api.main:app --port 8000
 ```
 
-Mở trình duyệt: `http://localhost:8000/health` trả về `{"status":"ok"}`; giao diện thử API tại `http://localhost:8000/docs`.
+Thử API không cần app: mở `http://localhost:8000/docs`, chọn `POST /search` và tải ảnh lên.
 
-**Cách 2: Docker**
+**Chạy app Flutter**
+
+```bash
+cd app
+flutter run -d web-server --web-port=5000
+```
+
+Mở `http://localhost:5000`, bấm "Chọn ảnh khách".
+
+**Cách 2: Docker (chỉ chạy API/test)**
 
 ```bash
 docker build -t lookmatch -f api/Dockerfile .
@@ -64,7 +80,7 @@ docker run -p 8000:8000 lookmatch
 
 **Kiểm thử tự động:** GitHub Actions chạy `pytest` mỗi lần push (xem tab Actions).
 
-**Demo (video 30–60 giây):** <https://drive.google.com/file/d/1SOBUdQ74zOjgbhquBs_k333wuubYw1Ed/view?usp=sharing>
+**Demo W04 (video 1–2 phút):** <https://drive.google.com/file/d/1BB1ewkq1RC8Vl2q9C4eQ_Wlny1Nb9JLN/view?usp=sharing>
 
 ## Tài liệu kiến trúc
 
@@ -76,5 +92,5 @@ docker run -p 8000:8000 lookmatch
 ## Quy ước
 
 - Dữ liệu người dùng chỉ thu khi có đồng ý, ẩn danh trước khi đưa vào repo.
-- Commit có hỗ trợ của AI dùng tiền tố `[AI]`.
+- Commit có hỗ trợ của AI dùng tiền tố `[AI]`. Test W04 do AI viết theo đặc tả của sinh viên (xem AI_LOG.md).
 - Tập kiểm thử tách riêng từ đầu, không dùng để chỉnh mô hình.
