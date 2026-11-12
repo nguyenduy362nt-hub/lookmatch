@@ -1,0 +1,17 @@
+# dữ liệu của shop và ảnh khách: KHÔNG đưa lên repo công khai
+data/
+eval/queries_raw/
+eval/scenarios/
+
+# môi trường và khoá
+.venv/
+.env
+
+# file sinh ra khi chạy
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Flutter
+app/build/
+app/.dart_tool/
