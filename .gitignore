@@ -15,3 +15,44 @@ __pycache__/
 # Flutter
 app/build/
 app/.dart_tool/
+# --- Bí mật ---
+.env
+*.env
+!.env.example
+
+# --- Dữ liệu và ảnh khách ---
+data/
+eval/real/
+eval/queries_raw/
+eval/scenarios/
+eval/cases.csv
+eval/manifest_real.csv
+eval/report.md
+eval/hand_read.csv
+eval/diagnose.md
+eval/scenarios.csv
+data/queries/
+data/feedback.jsonl
+log_pending.jsonl
+
+# --- Chỉ mục và bộ nhớ đệm ---
+*.npy
+*.faiss
+__pycache__/
+*.pyc
+.pytest_cache/
+catalog_cache.csv
+
+# --- Môi trường ---
+.venv/
+venv/
+
+# --- Flutter ---
+app/build/
+app/.dart_tool/
+.dart_tool/
+build/
+
+# --- Tạm ---
+*.log
+.DS_Store
