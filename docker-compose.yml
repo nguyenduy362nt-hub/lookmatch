@@ -1,0 +1,23 @@
+# Chạy toàn bộ API: copy .env.example thành .env, điền giá trị rồi:  docker compose up --build
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+      args:
+        INSTALL_ML: "1"
+    ports:
+      - "127.0.0.1:8000:8000"          # chỉ mở cho máy này, không mở ra mạng LAN/Internet
+    env_file:
+      - .env                           # bí mật đi vào container qua biến môi trường, không nằm trong image
+    volumes:
+      - ./data:/app/data               # chỉ mục (index.npy, ids.json), ảnh truy vấn, phản hồi
+      - hf_cache:/app/.cache/huggingface
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+volumes:
+  hf_cache:
