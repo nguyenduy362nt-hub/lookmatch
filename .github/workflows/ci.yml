@@ -1,8 +1,13 @@
 name: CI
+
 on:
   push:
     branches: [main]
   pull_request:
+
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -11,5 +16,42 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -r api/requirements.txt
-      - run: pytest -q
+          cache: pip
+          cache-dependency-path: api/requirements.txt
+      - name: Install dependencies
+        run: pip install -r api/requirements.txt
+      - name: Run tests
+        run: pytest -q
+
+  docker:
+    # Build image nhẹ, chạy container, kiểm tra /health và container không chạy bằng root
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -f api/Dockerfile -t lookmatch:ci .
+      - name: Run container and check /health
+        run: |
+          docker run -d --name lm -p 8000:8000 lookmatch:ci
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/health; then echo; break; fi
+            sleep 2
+          done
+          curl -fsS http://localhost:8000/health
+          test "$(docker exec lm id -u)" != "0"
+      - name: Show logs on failure
+        if: failure()
+        run: docker logs lm
+
+  audit:
+    # Quét thư viện có lỗ hổng đã công bố; chỉ cảnh báo, không làm đỏ CI
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pip-audit
+      - run: pip-audit -r api/requirements.txt
