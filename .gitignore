@@ -56,3 +56,7 @@ build/
 # --- Tạm ---
 *.log
 .DS_Store
+
+.env
+hf_cache/
+*.log
